@@ -172,7 +172,7 @@ typedef enum {
             } else {
                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                 NSArray *dataUsage = [defaults arrayForKey:@"dataUsage"];
-                NSDictionary *record = [dataUsage objectAtIndex:indexPath.row + 1];
+                NSDictionary *record = [dataUsage objectAtIndex:indexPath.row - 1];
                 
                 text = record[@"date"];
                 detailText = [formatter stringFromNumber:@([record[@"data"] floatValue]/1024.0)];
