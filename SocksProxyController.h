@@ -62,6 +62,7 @@
 @property (nonatomic, assign) NSInteger currentConnectionCount;
 @property (nonatomic, assign) NSInteger uploadData;
 @property (nonatomic, assign) NSInteger downloadData;
+@property (nonatomic, assign) NSInteger totalData;
 @property (nonatomic, strong) IBOutlet MOGlassButton *                  startOrStopButton;
 
 - (IBAction)startOrStopAction:(id)sender;

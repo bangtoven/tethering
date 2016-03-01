@@ -85,9 +85,38 @@
 							forState:UIControlStateNormal];
 	[self.startOrStopButton setupAsRedButton];
 	
-	[self refreshProxyTable];
+    [self updateTotalData];
+
+    NSTimer* timer = [NSTimer timerWithTimeInterval:60 target:self selector:@selector(updateTotalData) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];
 	
+    [self refreshProxyTable];
+    
 	LOG_NETWORK_SOCKS(NSLOGGER_LEVEL_INFO, @"Server Started");
+}
+
+- (void)updateTotalData {
+    NSDate *date = [NSDate date];
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDateComponents *components = [calendar components:(NSCalendarUnitDay | NSCalendarUnitMonth) fromDate:date];
+    NSInteger currentDay = components.day;
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSInteger lastDay = [defaults integerForKey:@"lastDay"];
+    if (lastDay != currentDay) {
+        self.totalData = 0;
+        [defaults setInteger:currentDay forKey:@"lastDay"];
+        
+        NSMutableArray *dataUsage = [([defaults arrayForKey:@"dataUsage"] ? : [NSArray array]) mutableCopy];
+        [dataUsage insertObject:@{@"date" : [NSString stringWithFormat:@"%ld/%ld",(long)components.month,(long)lastDay],
+                                  @"data" : @([defaults integerForKey:@"totalData"])}
+                        atIndex:0];
+        
+        [defaults setObject:dataUsage forKey:@"dataUsage"];
+    }
+
+    [defaults setInteger:self.totalData forKey:@"totalData"];
+    [defaults synchronize];
 }
 
 - (void)_serverDidStopWithReason:(NSString *)reason
@@ -111,8 +140,10 @@
 							forState:UIControlStateNormal];
 	[self.startOrStopButton setupAsGreenButton];
 
-	[self refreshProxyTable];
+    [self updateTotalData];
 
+    [self refreshProxyTable];
+    
 	LOG_NETWORK_SOCKS(NSLOGGER_LEVEL_INFO, @"Server Stopped: %@", reason);
 }
 
@@ -176,6 +207,7 @@
 - (void)_downloadData:(NSInteger)bytes
 {
     self.downloadData += bytes/1024;
+    self.totalData += bytes/1024;
 	
 	[self refreshProxyTable];
 }
@@ -184,6 +216,7 @@
 - (void)_uploadData:(NSInteger)bytes
 {
     self.uploadData += bytes/1024;
+    self.totalData += bytes/1024;
 	
 	[self refreshProxyTable];
 }
@@ -503,7 +536,7 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
 @synthesize currentAddress;
 @synthesize currentOpenConnections;
 @synthesize currentConnectionCount;
-@synthesize downloadData, uploadData;
+@synthesize downloadData, uploadData, totalData;
 @synthesize currentStatusText;//       = _statusLabel;
 @synthesize startOrStopButton = _startOrStopButton;
 
@@ -542,6 +575,9 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
 	[self.startOrStopButton setupAsGreenButton];
     
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    self.totalData = [defaults integerForKey:@"totalData"];
 }
 
 

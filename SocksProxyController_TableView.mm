@@ -17,6 +17,7 @@
 typedef enum {
 	SocksProxyTableSectionGeneral,
 	SocksProxyTableSectionConnections,
+    SocksProxyTableSectionTotal,
 	SocksProxyTableSectionCount
 } SocksProxyTableSection;
 
@@ -63,9 +64,13 @@ typedef enum {
 	{
 		case SocksProxyTableSectionGeneral:
 			return 2;
-			
 		case SocksProxyTableSectionConnections:
 			return 5;
+        case SocksProxyTableSectionTotal: {
+            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+            NSInteger count = MIN([defaults arrayForKey:@"dataUsage"].count, (NSUInteger)4);
+            return 1 + count;
+        }
 	}
 	
 	return 0;
@@ -156,6 +161,25 @@ typedef enum {
 				break;
 			}
 			break;
+            
+        case SocksProxyTableSectionTotal:{
+            NSNumberFormatter *formatter = [NSNumberFormatter new];
+            [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+            
+            if (indexPath.row == 0) {
+                text = @"today";
+                detailText = [formatter stringFromNumber:@(self.totalData/1024.0)];
+            } else {
+                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+                NSArray *dataUsage = [defaults arrayForKey:@"dataUsage"];
+                NSDictionary *record = [dataUsage objectAtIndex:indexPath.row + 1];
+                
+                text = record[@"date"];
+                detailText = [formatter stringFromNumber:@([record[@"data"] floatValue]/1024.0)];
+            }
+            break;
+        }
+            
 	}
 	
 	// set the field label title
