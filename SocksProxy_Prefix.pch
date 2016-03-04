@@ -11,7 +11,7 @@
 #import "UIDevice_Extended.h"
 #endif
 
-#define USE_NSLOGGER_LIB 1
+#define USE_NSLOGGER_LIB 0
 
 
 #ifdef DEBUG

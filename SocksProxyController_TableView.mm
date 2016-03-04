@@ -84,11 +84,15 @@ typedef enum {
 
 - (UITableViewCell *)tableView:(UITableView *)table cellForRowAtIndexPath:(NSIndexPath *)indexPath 
 {
-	#pragma unused(table)
+//	#pragma unused(table)
 	static NSString * cellId = @"cellid";
 	
-	UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue2
-												   reuseIdentifier:cellId];
+    UITableViewCell *cell = [table dequeueReusableCellWithIdentifier:cellId forIndexPath:indexPath];
+//    if (!cell) {
+//        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue2
+//                                      reuseIdentifier:cellId];
+//    }
+    
 	cell.accessoryType = UITableViewCellAccessoryNone;
 	cell.accessoryView = nil;
 	cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -168,14 +172,14 @@ typedef enum {
             
             if (indexPath.row == 0) {
                 text = @"today";
-                detailText = [formatter stringFromNumber:@(self.totalData/1024.0)];
+                detailText = [formatter stringFromNumber:@(self.totalData)];
             } else {
                 NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
                 NSArray *dataUsage = [defaults arrayForKey:@"dataUsage"];
                 NSDictionary *record = [dataUsage objectAtIndex:indexPath.row - 1];
                 
                 text = record[@"date"];
-                detailText = [formatter stringFromNumber:@([record[@"data"] floatValue]/1024.0)];
+                detailText = [formatter stringFromNumber:record[@"data"]];
             }
             break;
         }
