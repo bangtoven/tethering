@@ -6,7 +6,7 @@ I added 2 simple features.
 
 And I changed the UI/layout a little bit.
 
-![ScreenShot](screenshot.PNG)
+<img src="/screenshot.PNG" width="320">
 
 JB
 
