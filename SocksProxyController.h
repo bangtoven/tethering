@@ -68,4 +68,7 @@
 - (IBAction)startOrStopAction:(id)sender;
 
 - (void)refreshProxyTable;
+
+- (IBAction)done:(UIStoryboardSegue*)sender;
+
 @end

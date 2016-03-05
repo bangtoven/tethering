@@ -15,8 +15,8 @@
  * Specifies the sections of the table
  */
 typedef enum {
-	SocksProxyTableSectionGeneral,
-	SocksProxyTableSectionConnections,
+	SocksProxyTableSectionGeneral = -1,
+	SocksProxyTableSectionConnections = 0,
     SocksProxyTableSectionTotal,
 	SocksProxyTableSectionCount
 } SocksProxyTableSection;
@@ -66,11 +66,8 @@ typedef enum {
 			return 2;
 		case SocksProxyTableSectionConnections:
 			return 5;
-        case SocksProxyTableSectionTotal: {
-            NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-            NSInteger count = MIN([defaults arrayForKey:@"dataUsage"].count, (NSUInteger)4);
-            return 1 + count;
-        }
+        case SocksProxyTableSectionTotal:
+            return 1;
 	}
 	
 	return 0;
@@ -78,8 +75,12 @@ typedef enum {
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath 
 {
+    if (indexPath.section == SocksProxyTableSectionTotal) {
+        [self performSegueWithIdentifier:@"show usage" sender:self];
+    }
+    
 	//cell.selected = NO;
-	[tableView deselectRowAtIndexPath:indexPath animated:NO];
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)table cellForRowAtIndexPath:(NSIndexPath *)indexPath 
@@ -170,17 +171,10 @@ typedef enum {
             NSNumberFormatter *formatter = [NSNumberFormatter new];
             [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
             
-            if (indexPath.row == 0) {
-                text = @"today";
-                detailText = [formatter stringFromNumber:@(self.totalData)];
-            } else {
-                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-                NSArray *dataUsage = [defaults arrayForKey:@"dataUsage"];
-                NSDictionary *record = [dataUsage objectAtIndex:indexPath.row - 1];
-                
-                text = record[@"date"];
-                detailText = [formatter stringFromNumber:record[@"data"]];
-            }
+            text = @"today";
+            detailText = [formatter stringFromNumber:@(self.totalData>>10)];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+
             break;
         }
             

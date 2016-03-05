@@ -207,7 +207,7 @@
 - (void)_downloadData:(NSInteger)bytes
 {
     self.downloadData += bytes/1024;
-    self.totalData += bytes/1024;
+    self.totalData += bytes;
 	
 	[self refreshProxyTable];
 }
@@ -216,7 +216,7 @@
 - (void)_uploadData:(NSInteger)bytes
 {
     self.uploadData += bytes/1024;
-    self.totalData += bytes/1024;
+    self.totalData += bytes;
 	
 	[self refreshProxyTable];
 }
@@ -587,6 +587,17 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
     self.startOrStopButton = nil;
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
+}
 
 - (void)dealloc
 {
