@@ -172,7 +172,7 @@ typedef enum {
             [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
             
             text = @"today";
-            detailText = [formatter stringFromNumber:@(self.totalData>>10)];
+            detailText = [formatter stringFromNumber:@((self.totalData>>10)/1024.0)];
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
             break;
