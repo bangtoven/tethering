@@ -27,6 +27,7 @@
     for (NSDictionary *rec in dataUsage) {
         total += [rec[@"data"] integerValue];
     }
+    total += [defaults integerForKey:@"totalData"];
     
     formatter = [NSNumberFormatter new];
     [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
@@ -56,7 +57,7 @@
 }
 
 - (NSString *)formattedData:(NSInteger)data {
-    NSInteger division = (2-self.formatSegment.selectedSegmentIndex) * 10;
+    NSInteger division = (1-self.formatSegment.selectedSegmentIndex) * 10;
     double number = (data>>division) / 1024.0;
     return [formatter stringFromNumber:@(number)];
 }

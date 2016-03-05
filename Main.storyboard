@@ -143,7 +143,6 @@
                                     <rect key="frame" x="8" y="8" width="224" height="29"/>
                                     <color key="backgroundColor" cocoaTouchSystemColor="tableCellGroupedBackgroundColor"/>
                                     <segments>
-                                        <segment title="GB"/>
                                         <segment title="MB"/>
                                         <segment title="KB"/>
                                     </segments>
