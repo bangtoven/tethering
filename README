@@ -1,3 +1,17 @@
+forked from Ricky’s awesome project.
+
+I added 2 simple features.
+- data usage monitoring (just for my interest. very poorly coded. smelly code.)
+- open settings (VPN/Cellular) right from the app 
+
+And I changed the UI/layout a little bit.
+
+![ScreenShot](screenshot.PNG)
+
+JB
+
+-----------------------------------------------
+
 This project is forked from https://code.google.com/p/iphone-socks-proxy/
 
 The current goal is to make this iOS apps up-to-date and add new features.
