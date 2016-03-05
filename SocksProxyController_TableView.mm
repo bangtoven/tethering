@@ -15,9 +15,9 @@
  * Specifies the sections of the table
  */
 typedef enum {
-	SocksProxyTableSectionGeneral = -1,
-	SocksProxyTableSectionConnections = 0,
-    SocksProxyTableSectionTotal,
+	SocksProxyTableSectionConnections,
+    SocksProxyTableSectionUsage,
+    SocksProxyTableSectionControl,
 	SocksProxyTableSectionCount
 } SocksProxyTableSection;
 
@@ -25,14 +25,13 @@ typedef enum {
  * Specifies the rows of the table sections
  */
 typedef enum {
-	SocksProxyTableRowAddress,
-	SocksProxyTableRowPort,
-	// connections section
-	SocksProxyTableRowConnections = 0,
-	SocksProxyTableRowConnectionsOpen,
-    SocksProxyTableRowUpload,
-	SocksProxyTableRowDownload,
-	SocksProxyTableRowStatus
+    SocksProxyTableRowSettingsVPN,
+    SocksProxyTableRowSettingsUsage,
+    SocksProxyTableRowDown = 0,
+    SocksProxyTableRowUp,
+    SocksProxyTableRowTotal,
+    SocksProxyTableRowStatus = 0,
+    SocksProxyTableRowConnections,
 } SocksProxyTableRow;
 
 @implementation SocksProxyController (TableView)
@@ -42,10 +41,10 @@ typedef enum {
 - (NSString *)tableView:(UITableView *)table titleForHeaderInSection:(NSInteger)section
 {	
 	#pragma unused(table)
-	/*
-	if (section == SocksProxyTableSectionConnections)
-		return @"Connections";
-	*/
+    
+	if (section == SocksProxyTableSectionControl)
+		return @"Settings";
+    
     return nil;
 }
 
@@ -62,131 +61,111 @@ typedef enum {
 	
 	switch (section)
 	{
-		case SocksProxyTableSectionGeneral:
-			return 2;
 		case SocksProxyTableSectionConnections:
-			return 5;
-        case SocksProxyTableSectionTotal:
-            return 1;
+			return 2;
+        case SocksProxyTableSectionUsage:
+            return 3;
+        case SocksProxyTableSectionControl:
+            return 2;
 	}
 	
 	return 0;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath 
+- (UITableViewCell *)tableView:(UITableView *)table cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == SocksProxyTableSectionTotal) {
-        [self performSegueWithIdentifier:@"show usage" sender:self];
+    if (indexPath.section != SocksProxyTableSectionControl) {
+        
+        UITableViewCell *cell = [table dequeueReusableCellWithIdentifier:@"cellid" forIndexPath:indexPath];
+        cell.accessoryType = UITableViewCellAccessoryNone;
+        
+        NSString *text = nil; // the caption
+        NSString *detailText = nil;
+        
+        switch (indexPath.section) {
+                
+            case (SocksProxyTableSectionConnections):
+                switch (indexPath.row) {
+                    case (SocksProxyTableRowConnections):
+                        text = @"connections";
+                        detailText = [NSString stringWithFormat:@"%ld / %ld",(long)self.currentOpenConnections,(long)self.currentConnectionCount];
+                        break;
+                        
+                    case (SocksProxyTableRowStatus):
+                        text = @"status";
+                        detailText = self.currentStatusText;
+                        break;
+                }
+                break;
+                
+            case SocksProxyTableSectionUsage:
+                switch (indexPath.row) {
+                    case (SocksProxyTableRowDown):
+                        text = @"down";
+                        detailText = [@(self.downloadData) stringValue];
+                        break;
+                        
+                    case (SocksProxyTableRowUp):
+                        text = @"up";
+                        detailText = [@(self.uploadData) stringValue];
+                        break;
+        
+                    case SocksProxyTableRowTotal: {
+                        
+                        NSNumberFormatter *formatter = [NSNumberFormatter new];
+                        [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+                        
+                        text = @"total";
+                        detailText = [formatter stringFromNumber:@((self.totalData>>10)/1024.0)];
+                        
+                        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                        
+                        break;
+                    }
+                }
+                
+        }
+        
+        cell.textLabel.text = text;
+        cell.detailTextLabel.text = detailText;
+        
+        return cell;
+    } else {
+        UITableViewCell *cell = [table dequeueReusableCellWithIdentifier:@"actioncell" forIndexPath:indexPath];
+        switch (indexPath.row) {
+            case SocksProxyTableRowSettingsUsage:
+                cell.textLabel.text = @"Cellular usage";
+                break;
+            case SocksProxyTableRowSettingsVPN:
+                cell.textLabel.text = @"VPN";
+                break;
+        }
+        return cell;
     }
-    
-	//cell.selected = NO;
-    [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 
-- (UITableViewCell *)tableView:(UITableView *)table cellForRowAtIndexPath:(NSIndexPath *)indexPath 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//	#pragma unused(table)
-	static NSString * cellId = @"cellid";
-	
-    UITableViewCell *cell = [table dequeueReusableCellWithIdentifier:cellId forIndexPath:indexPath];
-//    if (!cell) {
-//        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue2
-//                                      reuseIdentifier:cellId];
-//    }
-    
-	cell.accessoryType = UITableViewCellAccessoryNone;
-	cell.accessoryView = nil;
-	cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    
-	NSString *text = nil; // the caption
-	NSString *detailText = nil;
-	
-	switch (indexPath.section)
-	{
-		case (SocksProxyTableSectionGeneral):
-			switch (indexPath.row)
-			{
-				case (SocksProxyTableRowAddress):
-				{
-					text = @"address";
-					detailText = self.currentAddress;
-					if (self.currentAddress.length == 0)
-						detailText = @"n/a";
-				}
-				break;
-					
-				case (SocksProxyTableRowPort):
-				{
-					text = @"port";
-					if (self.currentPort)
-						detailText = [@(self.currentPort) stringValue];
-					else
-						detailText = @"n/a";
-				}
-				break;
-			}
-			break;
-			
-		case (SocksProxyTableSectionConnections):
-			switch (indexPath.row)
-			{
-				case (SocksProxyTableRowConnectionsOpen):
-				{
-					text = @"open";
-					detailText = [@(self.currentOpenConnections) stringValue];
-				}
-				break;
-					
-				case (SocksProxyTableRowConnections):
-				{
-					text = @"count";
-					detailText = [@(self.currentConnectionCount) stringValue];
-				}
-				break;
-					
-				case (SocksProxyTableRowDownload):
-				{
-					text = @"down";
-					detailText = [@(self.downloadData) stringValue];
-				}
-				break;
-
-				case (SocksProxyTableRowUpload):
-				{
-					text = @"up";
-					detailText = [@(self.uploadData) stringValue];
-				}
-				break;
-					
-				case (SocksProxyTableRowStatus):
-				{
-					text = @"status";
-					detailText = self.currentStatusText;
-				}
-				break;
-			}
-			break;
-            
-        case SocksProxyTableSectionTotal:{
-            NSNumberFormatter *formatter = [NSNumberFormatter new];
-            [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-            
-            text = @"today";
-            detailText = [formatter stringFromNumber:@((self.totalData>>10)/1024.0)];
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-
+    switch (indexPath.section) {
+        case SocksProxyTableSectionUsage:
+            [self performSegueWithIdentifier:@"show usage" sender:self];
             break;
-        }
-            
-	}
-	
-	// set the field label title
-    cell.textLabel.text = text;
-	
-	// set the cell text
-    cell.detailTextLabel.text = detailText;
-	
-	return cell;
+        case SocksProxyTableSectionControl:
+            NSString *path = nil;
+            switch (indexPath.row) {
+                case SocksProxyTableRowSettingsUsage:
+                    path = @"prefs:root=MOBILE_DATA_SETTINGS_ID";
+                    break;
+                case SocksProxyTableRowSettingsVPN:
+                    path = @"prefs:root=General&path=VPN";
+                    break;
+            }
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:path]];
+            break;
+    }
+    
+    //cell.selected = NO;
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
 }
 
 @end
