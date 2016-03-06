@@ -1,8 +1,8 @@
 This project is forked from [rickyzhang82](https://github.com/rickyzhang82/tethering)’s awesome project.
-I also pulled [bsuh](https://github.com/bsuh/tethering)'s fork, which has limitless background feature.
+I also pulled [bsuh](https://github.com/bsuh/tethering)'s fork, which implemented limitless background and more.
 
 My fork has 2 simple additional features.
-- data usage monitoring (just for my interest. very poorly coded. smelly is it.)
+- data usage monitoring (just for my interest. very poorly coded. smelly code.)
 - open certain section of system settings app (VPN/Cellular) right from the app 
 
 And I changed the UI/layout a little bit.
